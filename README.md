@@ -15,9 +15,9 @@ Class:  **[COMP6703001] B4AC**
 
 Group Members:
     
-    o Jerico, 2802521112, ..., JericoTj
-    o YiYang, 2802542924, ..., TT1264
-    o Sasha, 2802536442 , ..., mumeiphoric
+    o Jerico, 2802521112, Team Lead, JericoTj
+    o YiYang, 2802542924, Backend, TT1264
+    o Sasha, 2802536442 , Support, mumeiphoric
 ---
 ## Instructor & Repository Access
 This repository must be shared with:
@@ -59,7 +59,7 @@ This repository must be shared with:
 | Layer  | Technology |
 | ------------- |:-------------:|
 | Frontend      | **Next.js**   |
-| Backend       | **Node.js or Next.js**     |
+| Backend       | **Node.js**     |
 | API      | **REST API**     |
 | Database      | **PostgreSQL / Firebase (for auth only)**     |
 | Containerization      | **Docker**     |
@@ -71,14 +71,21 @@ This repository must be shared with:
 ### Architecture Diagram
 
     **Insert architecture diagram image or ASCII diagram here.**
+    - We are going for a Monolith Approach and here is a BETA version of our architecture diagram
+[Draw.io To architecture Diagram Demo](https://drive.google.com/file/d/1vXJWzEUojUdsHUP0AKwCOP5IFZKlNHoX/view?usp=sharing)
+
 
 ### Architecture Explanation
 
     • Frontend ↔ API ↔ Database interaction
+        - the frontend implementation we will be using is next.Js wiyth the backend using node,js 
+        - The system will use a Modular Monolithic Architecture. As all the components will then be combined and deployed as a single applications, but in its internals it would be structured in multiples modules in a way to maintain the appliacation scalibility and maintainability from bugs and security flaws
 
     • Separation of concerns
+        - 
 
     • Where security is enforced
+        - Security is enforced in particularly login auth, and file storage to ensure user confidentiality
 
 ---
 ## API Design (MANDATORY)
