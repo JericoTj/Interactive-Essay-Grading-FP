@@ -55,19 +55,16 @@ This repository must be shared with:
 ---
 ## Technology Stack
 
-Frontend: **Next.js**
 
-Backend: **Node.js or Next.js**
-
-API: **REST API**
-
-Database: **PostgreSQL / Firebase (for auth only)**
-
-Containerization: **Docker**
-
-Deployment: **Vercel**
-
-Version Control: **GitHub**
+| Layer  | Technology |
+| ------------- |:-------------:|
+| Frontend      | **Next.js**   |
+| Backend       | **Node.js or Next.js**     |
+| API      | **REST API**     |
+| Database      | **PostgreSQL / Firebase (for auth only)**     |
+| Containerization      | **Docker**     |
+| Deployment      | **Vercel**     |
+| Version Control      | **GitHub**     |
 
 ---
 ## System Architecture
@@ -76,8 +73,6 @@ Version Control: **GitHub**
     **Insert architecture diagram image or ASCII diagram here.**
 
 ### Architecture Explanation
-
-Explain:
 
     • Frontend ↔ API ↔ Database interaction
 
@@ -90,7 +85,14 @@ Explain:
 
 ### API Endpoints
 
-- 
+
+| Method  | Endpoint | Description  | Auth Required | 
+| ------------- |:-------------:|:-------------:|:-------------:|
+| Get   |  |   | Yes/No | 
+| Post   |  |   | Yes/No | 
+| Put   |  |   | Yes/No | 
+| Delete   |  |   | Yes/No | 
+
 
 ### API Documentation
     
@@ -149,3 +151,92 @@ Explain:
     
 ---
 
+## Testing Documentation 
+
+### Frontend Testing
+
+### Backend & API Testing
+
+### Security Testing 
+
+### AI Functionality Testing 
+
+---
+11. Deployment & Production Setup
+
+### Docker Setup
+
+    • Dockerfile included
+
+    • docker-compose.yml included
+
+### Production Environment
+
+    Explain:
+
+    • Environment variables
+
+    • Secrets handling
+
+    • HTTPS configuration
+
+### Live Application URL
+
+    URL SOMETHING SOMETHING
+
+---
+
+### GitHub Contribution Summary (INDIVIDUAL)
+
+Each student must list their own contribution.
+
+Student Name: [Name]
+
+    • Features implemented:
+
+    • API endpoints handled:
+
+    • Tests written:
+
+    • Security work:
+
+    • AI-related work:
+
+__Contributions must match GitHub commit history.__
+
+---
+
+## AI Usage Disclosure (MANDATORY)
+
+    List:
+
+    • AI tools used (e.g., ChatGPT, OpenAI API)
+
+    • Purpose of usage
+
+    • Which parts were assisted
+
+Example:
+“ChatGPT was used to assist with API structure and AI testing scenario generation. All
+code was reviewed and modified by the team.”
+
+---
+
+## Known Limitations & Future Improvements
+    • Current limitations
+    • Possible future enhancements
+    • AI limitations and risks
+
+---
+## Final Declaration
+
+We declare that:
+
+    • This project is our own work
+    • AI usage is disclosed honestly
+    • All group members understand the system
+Signed by Group Members:
+
+---
+# SETUP
+## DEPLOYMENT INSTRUCTIONS
