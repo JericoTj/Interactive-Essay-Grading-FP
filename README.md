@@ -16,8 +16,8 @@ Class:  **[COMP6703001] B4AC**
 Group Members:
     
     o Jerico, 2802521112, ..., JericoTj
-    o YiYang, 2802542924, ..., ...
-    o Sasha, 2802536442, ..., ...
+    o YiYang, 2802542924, ..., TT1264
+    o Sasha, 2802536442 , ..., ...
 ---
 ## Instructor & Repository Access
 This repository must be shared with:
@@ -37,16 +37,21 @@ This repository must be shared with:
 ### Problem Statement
 
     • What problem does this application solve?
+        - This application is meant as an alternative and an easier way one can review, check or even check an essay or numerous essays in a single application
 
     • Who are the target users?
+        - The target audiences for this applications are both students and lecturers/Teachers  
 
 ### Solution Overview
 
     • Main features
+        - Main features that this app holds are the ability to check Essays from Grammar, Essay Format, AI checker , plagiarism checker and Grading such Essays
 
     • Why this solution is appropriate
+        - This solution is appropriate as it allows all the thing students/teachers want to check in a single website
 
     • Where AI is used
+        - AI is used to identify plagiarism, Grammar, Format, and Checking Originality from AI
 ---
 ## Technology Stack
 
