@@ -17,7 +17,7 @@ Group Members:
     
     o Jerico, 2802521112, ..., JericoTj
     o YiYang, 2802542924, ..., TT1264
-    o Sasha, 2802536442 , ..., ...
+    o Sasha, 2802536442 , ..., mumeiphoric
 ---
 ## Instructor & Repository Access
 This repository must be shared with:
