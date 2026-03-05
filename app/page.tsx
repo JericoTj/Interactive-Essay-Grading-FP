@@ -1,65 +1,119 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { getUser, saveUser } from "@/lib/auth";
+
+type View = "login" | "forgot" | "reset-done";
+
+export default function LoginPage() {
+  const router = useRouter();
+
+  const [view, setView]         = useState<View>("login");
+  const [email, setEmail]       = useState("");
+  const [password, setPassword] = useState("");
+  const [resetEmail, setReset]  = useState("");
+  const [error, setError]       = useState("");
+
+  // Already logged in → go straight to dashboard
+  useEffect(() => {
+    if (getUser()) router.replace("/dashboard/checker");
+  }, [router]);
+
+  function handleSignIn() {
+    if (!email || !password) { setError("Please fill in both fields."); return; }
+    saveUser({ name: "John WADS", email });
+    router.push("/dashboard/checker");
+  }
+
+  function handleReset() {
+    if (!resetEmail) return;
+    setView("reset-done");
+  }
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+    <div className="auth-bg fade-up">
+      <div className="auth-card">
+        <h1 className="auth-logo">EasyEssays</h1>
+        <div className="auth-divider" />
+
+        {/* ── Sign In ── */}
+        {view === "login" && (
+          <>
+            {error && <p className="auth-error">{error}</p>}
+
+            <div className="auth-field">
+              <label className="auth-label">Email</label>
+              <input
+                className="ee-input"
+                type="email"
+                placeholder="Value"
+                value={email}
+                onChange={(e) => { setEmail(e.target.value); setError(""); }}
+              />
+            </div>
+
+            <div className="auth-field-last">
+              <label className="auth-label">Password</label>
+              <input
+                className="ee-input"
+                type="password"
+                placeholder="Value"
+                value={password}
+                onChange={(e) => { setPassword(e.target.value); setError(""); }}
+                onKeyDown={(e) => e.key === "Enter" && handleSignIn()}
+              />
+            </div>
+
+            <button className="btn-dark" onClick={handleSignIn}>Sign In</button>
+
+            <div className="auth-center">
+              <span className="auth-link" onClick={() => setView("forgot")}>
+                Forgot password?
+              </span>
+            </div>
+          </>
+        )}
+
+        {/* ── Forgot password ── */}
+        {view === "forgot" && (
+          <>
+            <div className="auth-field-last">
+              <label className="auth-label">Email</label>
+              <input
+                className="ee-input"
+                type="email"
+                placeholder="Value"
+                value={resetEmail}
+                onChange={(e) => setReset(e.target.value)}
+              />
+            </div>
+            <div style={{ display: "flex", gap: 12 }}>
+              <button className="auth-cancel" onClick={() => setView("login")}>Cancel</button>
+              <button className="btn-dark" style={{ flex: 2 }} onClick={handleReset}>
+                Reset Password
+              </button>
+            </div>
+          </>
+        )}
+
+        {/* ── Reset sent ── */}
+        {view === "reset-done" && (
+          <div style={{ textAlign: "center" }}>
+            <div style={{ fontSize: 28, marginBottom: 12 }}>✅</div>
+            <p style={{ fontWeight: 600, marginBottom: 6 }}>Reset link sent!</p>
+            <p style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 20 }}>
+              Check your inbox at {resetEmail}
+            </p>
+            <button
+              className="btn-dark"
+              onClick={() => { setView("login"); setReset(""); }}
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+              Back to Sign In
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
