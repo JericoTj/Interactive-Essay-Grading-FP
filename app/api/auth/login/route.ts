@@ -36,7 +36,12 @@ export async function POST(req: Request) {
   const { email, password } = await req.json();
 
   if (!email || !password) {
-    return NextResponse.json({ error: "Email and password required" }, { status: 400 });
+  return NextResponse.json({ error: "Email and password required" }, { status: 400 });
+  }
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    return NextResponse.json({ error: "Invalid email address" }, { status: 400 });
   }
 
   const user = await prisma.user.findUnique({ where: { email } });

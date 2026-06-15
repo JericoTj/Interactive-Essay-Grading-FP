@@ -64,7 +64,7 @@ export default function LoginPage() {
               <input
                 className="ee-input"
                 type="email"
-                placeholder="Value"
+                placeholder="Enter your email"
                 value={email}
                 onChange={(e) => { setEmail(e.target.value); setError(""); }}
               />
@@ -75,7 +75,7 @@ export default function LoginPage() {
               <input
                 className="ee-input"
                 type="password"
-                placeholder="Value"
+                placeholder="Enter your password"
                 value={password}
                 onChange={(e) => { setPassword(e.target.value); setError(""); }}
                 onKeyDown={(e) => e.key === "Enter" && handleSignIn()}
@@ -100,7 +100,7 @@ export default function LoginPage() {
               <input
                 className="ee-input"
                 type="email"
-                placeholder="Value"
+                placeholder="Enter your email"
                 value={resetEmail}
                 onChange={(e) => setReset(e.target.value)}
               />

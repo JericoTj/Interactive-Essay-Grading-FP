@@ -27,15 +27,18 @@ import { verifyToken } from "@/lib/auth";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
+
+  // Auth check
   const user = verifyToken(req);
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const essay = await prisma.essay.findUnique({
-    where: { id: parseInt(params.id) },
+    where: { id: parseInt(id) },
     include: { gradingResult: true, user: { select: { name: true, email: true } } },
   });
 
