@@ -20,16 +20,33 @@ export default function LoginPage() {
     if (getUser()) router.replace("/dashboard/checker");
   }, [router]);
 
-  function handleSignIn() {
+  async function handleSignIn() {
     if (!email || !password) { setError("Please fill in both fields."); return; }
-    saveUser({ name: "John WADS", email });
-    router.push("/dashboard/checker");
-  }
+    
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
 
-  function handleReset() {
-    if (!resetEmail) return;
-    setView("reset-done");
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.error || "Login failed");
+        return;
+      }
+
+      saveUser(data.token);
+      router.push("/dashboard/checker");
+    } catch {
+      setError("Something went wrong, please try again");
+    }
   }
+    function handleReset() {
+      if (!resetEmail) return;
+      setView("reset-done");
+    }
 
   return (
     <div className="auth-bg fade-up">
