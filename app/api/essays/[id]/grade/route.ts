@@ -1,17 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { verifyToken } from "@/lib/auth-server";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import Groq from "groq-sdk";
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
-async function callGemini(prompt: string): Promise<string> {
-  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-  const result = await model.generateContent(prompt);
-  const text = result.response.text();
-  // Strip markdown code fences if present
-  return text.replace(/```json\n?|\n?```/g, "").trim();
+async function callGroq(prompt: string): Promise<string> {
+  const completion = await groq.chat.completions.create({
+    model: "llama-3.3-70b-versatile",
+    messages: [{ role: "user", content: prompt }],
+    temperature: 0.3,
+    response_format: { type: "json_object" },
+  });
+  return completion.choices[0].message.content ?? "";
 }
+
 
 /**
  * @swagger
@@ -41,42 +44,37 @@ export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const { id } = await params;
-
-  // Auth check
-  const user = verifyToken(req);
-  if (!user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  const essayId = parseInt(id);
-  if (isNaN(essayId)) {
-    return NextResponse.json({ error: "Invalid essay ID" }, { status: 400 });
-  }
-
-  // Get essay
-  const essay = await prisma.essay.findUnique({ where: { id: essayId } });
-  if (!essay) {
-    return NextResponse.json({ error: "Essay not found" }, { status: 404 });
-  }
-
-  // Students can only grade their own essays
-  if (user.role === "STUDENT" && essay.userId !== user.userId) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
-
-  // Check if already graded
-  const existing = await prisma.gradingResult.findUnique({ where: { essayId } });
-  if (existing) {
-    return NextResponse.json({ error: "Essay already graded", result: existing }, { status: 400 });
-  }
-
-  // Reject too-short essays
-  if (essay.content.trim().split(" ").length < 20) {
-    return NextResponse.json({ error: "Essay is too short to grade" }, { status: 400 });
-  }
-
   try {
+    const { id } = await params;
+
+    const user = verifyToken(req);
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const essayId = parseInt(id);
+    if (isNaN(essayId)) {
+      return NextResponse.json({ error: "Invalid essay ID" }, { status: 400 });
+    }
+
+    const essay = await prisma.essay.findUnique({ where: { id: essayId } });
+    if (!essay) {
+      return NextResponse.json({ error: "Essay not found" }, { status: 404 });
+    }
+
+    if (user.role === "STUDENT" && essay.userId !== user.userId) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    const existing = await prisma.gradingResult.findUnique({ where: { essayId } });
+    if (existing) {
+      return NextResponse.json({ error: "Essay already graded", result: existing }, { status: 400 });
+    }
+
+    if (essay.content.trim().split(" ").length < 20) {
+      return NextResponse.json({ error: "Essay is too short to grade" }, { status: 400 });
+    }
+
     // AI FEATURE 1: Rubric-aligned scoring
     const gradingPrompt = `You are an academic essay grader. Grade the following essay across three criteria: grammar, structure, and clarity.
 Return ONLY valid JSON with no extra text or markdown code fences:
@@ -108,25 +106,35 @@ Return ONLY valid JSON with no extra text or markdown code fences:
 ESSAY:
 ${essay.content}`;
 
-    // Run both AI calls in parallel
-    const [gradingRaw, annotationRaw] = await Promise.all([
-      callGemini(gradingPrompt),
-      callGemini(annotationPrompt),
-    ]);
+    let gradingRaw: string, annotationRaw: string;
 
-    // Parse responses
+    try {
+      [gradingRaw, annotationRaw] = await Promise.all([
+        callGroq(gradingPrompt),
+        callGroq(annotationPrompt),
+      ]);
+    } catch (groqError) {
+      console.error("GROQ CALL FAILED:", groqError);
+      return NextResponse.json(
+        { error: "AI service unavailable", detail: String(groqError) },
+        { status: 503 }
+      );
+    }
+
     let grading, annotations;
     try {
       grading = JSON.parse(gradingRaw);
       annotations = JSON.parse(annotationRaw);
-    } catch {
+    } catch (parseError) {
+      console.error("PARSE FAILED:", parseError);
+      console.error("Raw grading:", gradingRaw);
+      console.error("Raw annotations:", annotationRaw);
       return NextResponse.json(
-        { error: "AI returned malformed response, please try again" },
+        { error: "AI returned malformed response", detail: String(parseError) },
         { status: 500 }
       );
     }
 
-    // Save to DB
     const result = await prisma.gradingResult.create({
       data: {
         essayId: essay.id,
@@ -144,12 +152,10 @@ ${essay.content}`;
 
     return NextResponse.json(result);
 
-  } catch (error: unknown) {
-    if (error instanceof Error && error.name === "TimeoutError") {
-      return NextResponse.json({ error: "AI service timed out, please try again" }, { status: 504 });
-    }
+  } catch (topLevelError) {
+    console.error("TOP LEVEL ERROR:", topLevelError);
     return NextResponse.json(
-      { error: "Grading failed", detail: String(error) },
+      { error: "Unexpected error", detail: String(topLevelError) },
       { status: 500 }
     );
   }

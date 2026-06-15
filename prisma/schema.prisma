@@ -25,11 +25,26 @@ model User {
 model Essay {
   id            Int            @id @default(autoincrement())
   title         String
-  content       String
+  content       String         @default("")
+  fileUrl       String?
+  fileKey       String?
+  fileName      String?
   userId        Int
   user          User           @relation(fields: [userId], references: [id])
   gradingResult GradingResult?
   createdAt     DateTime       @default(now())
+}
+
+model Rubric {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  fileUrl     String?
+  fileKey     String?
+  fileName    String?
+  userId      Int
+  user        User     @relation(fields: [userId], references: [id])
+  createdAt   DateTime @default(now())
 }
 
 model GradingResult {
@@ -48,11 +63,3 @@ model GradingResult {
   gradedAt          DateTime @default(now())
 }
 
-model Rubric {
-  id          Int      @id @default(autoincrement())
-  name        String
-  description String?
-  userId      Int
-  user        User     @relation(fields: [userId], references: [id])
-  createdAt   DateTime @default(now())
-}

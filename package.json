@@ -9,10 +9,12 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@google/generative-ai": "^0.24.1",
+    "@aws-sdk/client-s3": "^3.1069.0",
+    "@aws-sdk/s3-request-presigner": "^3.1069.0",
     "@prisma/adapter-pg": "^7.8.0",
     "bcrypt": "^6.0.0",
     "dotenv": "^16.4.5",
+    "groq-sdk": "^1.2.1",
     "jsonwebtoken": "^9.0.3",
     "next": "^15.3.3",
     "pg": "^8.21.0",
