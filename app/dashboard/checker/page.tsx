@@ -3,12 +3,10 @@
 import { useState, useRef } from "react";
 import TitleCard from "@/components/TitleCard";
 import { UploadIcon } from "@/components/icons";
-import { MOCK_RESULT } from "@/lib/mock-data";
 import type { GradeResult, Criterion } from "@/lib/types";
 
 type View = "input" | "summary" | "detail";
 
-/* ── helpers ─────────────────────────────────────────────────────────────── */
 function scoreColor(score: number) {
   if (score >= 85) return "var(--green)";
   if (score >= 70) return "var(--orange)";
@@ -33,25 +31,92 @@ function CriterionRow({ c }: { c: Criterion }) {
   );
 }
 
-/* ── Input view ──────────────────────────────────────────────────────────── */
 function InputView({ onResult }: { onResult: (r: GradeResult) => void }) {
+  const [title, setTitle]       = useState("");
   const [text, setText]         = useState("");
-  const [rubric, setRubric]     = useState<File | null>(null);
+  const [error, setError]       = useState("");
   const [checking, setChecking] = useState(false);
-  const rubricRef = useRef<HTMLInputElement>(null);
 
-  function handleCheck() {
-    if (!text.trim()) return;
+  async function handleCheck() {
+    if (!title.trim() || !text.trim()) {
+      setError("Please enter a title and essay text.");
+      return;
+    }
+    setError("");
     setChecking(true);
-    setTimeout(() => { setChecking(false); onResult(MOCK_RESULT); }, 3000);
+
+    try {
+      const token = localStorage.getItem("token");
+
+      // Step 1: Submit essay
+      const essayRes = await fetch("/api/essays", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ title, content: text }),
+      });
+
+      if (!essayRes.ok) {
+        const e = await essayRes.json();
+        setError(e.error || "Failed to submit essay");
+        setChecking(false);
+        return;
+      }
+
+      const essay = await essayRes.json();
+
+      // Step 2: Grade essay
+      const gradeRes = await fetch(`/api/essays/${essay.id}/grade`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (!gradeRes.ok) {
+        const e = await gradeRes.json();
+        setError(e.error || "Grading failed");
+        setChecking(false);
+        return;
+      }
+
+      const grading = await gradeRes.json();
+
+      // Step 3: Map to GradeResult shape
+      const result: GradeResult = {
+        aiScore: 0,
+        grade: grading.overallScore,
+        letter: grading.overallScore >= 90 ? "A" : grading.overallScore >= 80 ? "B" : grading.overallScore >= 70 ? "C" : "D",
+        summary: grading.overallFeedback,
+        criteria: [
+          { name: "Grammar",   score: grading.grammarScore,   max: 100, feedback: grading.grammarFeedback },
+          { name: "Structure", score: grading.structureScore, max: 100, feedback: grading.structureFeedback },
+          { name: "Clarity",   score: grading.clarityScore,   max: 100, feedback: grading.clarityFeedback },
+        ],
+      };
+
+      onResult(result);
+    } catch {
+      setError("Something went wrong, please try again.");
+    } finally {
+      setChecking(false);
+    }
   }
 
   return (
     <div className="checker-wrap fade-up">
       <TitleCard title="Essay Checker" />
-
       <div className="content-card checker-card">
-        {/* Text area */}
+        {error && <p style={{ color: "var(--red)", fontSize: 13, marginBottom: 8 }}>{error}</p>}
+
+        <input
+          className="ee-input"
+          placeholder="Essay title"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          style={{ marginBottom: 10 }}
+        />
+
         <div
           className="essay-area"
           onClick={() => document.getElementById("essay-ta")?.focus()}
@@ -59,7 +124,7 @@ function InputView({ onResult }: { onResult: (r: GradeResult) => void }) {
           {!text && (
             <div className="essay-placeholder">
               <UploadIcon size={20} />
-              Upload or Paste Text here
+              Paste your essay here
             </div>
           )}
           <textarea
@@ -70,22 +135,9 @@ function InputView({ onResult }: { onResult: (r: GradeResult) => void }) {
           />
         </div>
 
-        {/* Actions */}
         <div className="checker-actions">
           <button className="btn-blue" onClick={handleCheck} disabled={!text.trim() || checking}>
-            {checking ? "Checking…" : "Check"}
-          </button>
-
-          <input
-            type="file"
-            ref={rubricRef}
-            accept=".pdf,.docx,.txt"
-            onChange={(e) => setRubric(e.target.files?.[0] ?? null)}
-            style={{ display: "none" }}
-          />
-          <button className="btn-blue" onClick={() => rubricRef.current?.click()}>
-            <UploadIcon />
-            {rubric ? rubric.name.slice(0, 16) + "…" : "Rubric"}
+            {checking ? "Grading…" : "Check"}
           </button>
         </div>
       </div>
@@ -93,32 +145,18 @@ function InputView({ onResult }: { onResult: (r: GradeResult) => void }) {
   );
 }
 
-/* ── Summary view ────────────────────────────────────────────────────────── */
-function SummaryView({
-  result,
-  onNext,
-}: {
-  result: GradeResult;
-  onNext: () => void;
-}) {
+function SummaryView({ result, onNext }: { result: GradeResult; onNext: () => void }) {
   return (
     <div className="checker-wrap fade-up">
       <TitleCard title="Summary" />
-
       <div className="summary-layout" style={{ flex: 1, minHeight: 0 }}>
-        {/* Left */}
         <div className="content-card summary-left">
           <p className="summary-text">{result.summary}</p>
           {result.criteria.map((c, i) => <CriterionRow key={i} c={c} />)}
         </div>
-
-        {/* Right – matches Figma image3 exactly */}
         <div className="content-card summary-right">
           <div>
             <div style={{ marginBottom: 28 }}>
-              <div className="score-label">AI &nbsp;&nbsp;{result.aiScore}%</div>
-            </div>
-            <div>
               <div className="score-label">Grades &nbsp;{result.grade}%</div>
               <div className="score-letter">{result.letter}</div>
             </div>
@@ -132,7 +170,6 @@ function SummaryView({
   );
 }
 
-/* ── Detail view ─────────────────────────────────────────────────────────── */
 function DetailView({ result, onBack }: { result: GradeResult; onBack: () => void }) {
   return (
     <div className="fade-up" style={{ display: "flex", flexDirection: "column", gap: 14 }}>
@@ -140,32 +177,17 @@ function DetailView({ result, onBack }: { result: GradeResult; onBack: () => voi
         <TitleCard title="Detailed Report" />
         <button className="btn-blue" onClick={onBack}>← Back</button>
       </div>
-
       <div className="content-card">
         {result.criteria.map((c, i) => (
-          <div
-            key={i}
-            style={{
-              marginBottom: 22,
-              paddingBottom: 22,
-              borderBottom: i < result.criteria.length - 1 ? "1px solid var(--border)" : "none",
-            }}
-          >
+          <div key={i} style={{ marginBottom: 22, paddingBottom: 22, borderBottom: i < result.criteria.length - 1 ? "1px solid var(--border)" : "none" }}>
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
               <span style={{ fontWeight: 700, fontSize: 15 }}>{c.name}</span>
-              <span style={{ fontWeight: 800, fontSize: 18, color: scoreColor(c.score) }}>
-                {c.score}/{c.max}
-              </span>
+              <span style={{ fontWeight: 800, fontSize: 18, color: scoreColor(c.score) }}>{c.score}/{c.max}</span>
             </div>
             <div className="score-bar-track" style={{ height: 7, marginBottom: 8 }}>
-              <div
-                className="score-bar-fill"
-                style={{ width: `${(c.score / c.max) * 100}%`, background: scoreColor(c.score) }}
-              />
+              <div className="score-bar-fill" style={{ width: `${(c.score / c.max) * 100}%`, background: scoreColor(c.score) }} />
             </div>
-            <p style={{ fontSize: 13, color: "var(--text-muted)", lineHeight: 1.6, fontStyle: "italic" }}>
-              {c.feedback}
-            </p>
+            <p style={{ fontSize: 13, color: "var(--text-muted)", lineHeight: 1.6, fontStyle: "italic" }}>{c.feedback}</p>
           </div>
         ))}
       </div>
@@ -173,7 +195,6 @@ function DetailView({ result, onBack }: { result: GradeResult; onBack: () => voi
   );
 }
 
-/* ── Page ────────────────────────────────────────────────────────────────── */
 export default function CheckerPage() {
   const [view, setView]     = useState<View>("input");
   const [result, setResult] = useState<GradeResult | null>(null);
@@ -183,12 +204,8 @@ export default function CheckerPage() {
   return (
     <>
       {view === "input"   && <InputView onResult={handleResult} />}
-      {view === "summary" && result && (
-        <SummaryView result={result} onNext={() => setView("detail")} />
-      )}
-      {view === "detail"  && result && (
-        <DetailView result={result} onBack={() => setView("summary")} />
-      )}
+      {view === "summary" && result && <SummaryView result={result} onNext={() => setView("detail")} />}
+      {view === "detail"  && result && <DetailView result={result} onBack={() => setView("summary")} />}
     </>
   );
 }

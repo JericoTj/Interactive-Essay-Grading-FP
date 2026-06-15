@@ -1,3 +1,9 @@
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/db";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+
+
 /**
  * @swagger
  * /auth/login:
@@ -24,10 +30,7 @@
  *       404:
  *         description: User not found
  */
-import { NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
-import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
+
 
 export async function POST(req: Request) {
   const { email, password } = await req.json();

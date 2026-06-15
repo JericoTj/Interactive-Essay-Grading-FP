@@ -130,6 +130,13 @@ export default function LoginPage() {
             </button>
           </div>
         )}
+
+        <div className="auth-center" style={{ marginTop: 8 }}>
+          <span className="auth-link" onClick={() => router.push("/register")}>
+            Don't have an account? Register
+          </span>
+        </div>  
+
       </div>
     </div>
   );
