@@ -20,11 +20,29 @@ export default function LoginPage() {
     if (getUser()) router.replace("/dashboard/checker");
   }, [router]);
 
-  function handleSignIn() {
-    if (!email || !password) { setError("Please fill in both fields."); return; }
-    saveUser({ name: "John WADS", email });
+  async function handleSignIn() {
+  if (!email || !password) { setError("Please fill in both fields."); return; }
+
+  try {
+    const res = await fetch("/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      setError(data.error || "Login failed");
+      return;
+    }
+
+    saveUser(data.token);
     router.push("/dashboard/checker");
+  } catch {
+    setError("Something went wrong, please try again.");
   }
+}
 
   function handleReset() {
     if (!resetEmail) return;
@@ -113,6 +131,13 @@ export default function LoginPage() {
             </button>
           </div>
         )}
+
+        <div className="auth-center" style={{ marginTop: 8 }}>
+          <span className="auth-link" onClick={() => router.push("/register")}>
+            Don't have an account? Register
+          </span>
+        </div>  
+
       </div>
     </div>
   );

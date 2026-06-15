@@ -1,3 +1,7 @@
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/db";
+import bcrypt from "bcrypt";
+
 /**
  * @swagger
  * /auth/register:
@@ -29,10 +33,6 @@
  *       500:
  *         description: User creation failed
  */
-import { NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
-import bcrypt from "bcrypt";
-
 export async function POST(req: Request) {
   try {
     const { name, email, password, role } = await req.json();
