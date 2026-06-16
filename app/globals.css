@@ -434,3 +434,178 @@ body {
 }
 .files-row:nth-child(odd)  { background: #fafafa; }
 .files-row:nth-child(even) { background: #fff; }
+
+/* ─── File viewer modal ─────────────────────────────────────────────────────── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+}
+.modal-card {
+  background: var(--card-bg);
+  border-radius: 8px;
+  width: 100%;
+  max-width: 900px;
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 8px 32px rgba(0,0,0,.2);
+}
+.modal-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--card-bg);
+}
+.modal-header h2 {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0;
+  color: var(--text-dark);
+}
+.modal-body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+.modal-left {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  border-right: 1px solid var(--border);
+}
+.modal-right {
+  width: 280px;
+  flex-shrink: 0;
+  padding: 20px;
+  overflow-y: auto;
+  background: #fafafa;
+}
+.modal-section-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 12px;
+}
+.modal-score-big {
+  font-size: 40px;
+  font-weight: 800;
+  text-align: center;
+  margin-bottom: 4px;
+}
+.modal-feedback {
+  font-size: 13px;
+  color: var(--text-muted);
+  text-align: center;
+  line-height: 1.6;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+.modal-criterion {
+  margin-bottom: 14px;
+}
+.modal-criterion-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.modal-annotation {
+  background: #fff;
+  border-left: 3px solid var(--border);
+  border-radius: 0 6px 6px 0;
+  padding: 8px 10px;
+  margin-bottom: 8px;
+}
+.modal-annotation-type {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  margin-bottom: 3px;
+}
+.modal-annotation-sentence {
+  font-size: 12px;
+  font-style: italic;
+  color: var(--text-dark);
+  margin-bottom: 3px;
+}
+.modal-annotation-suggestion {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.modal-essay-text {
+  font-size: 13px;
+  line-height: 1.8;
+  color: var(--text-dark);
+  white-space: pre-wrap;
+}
+
+/* ─── Responsive ─────────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .dashboard-shell {
+    flex-direction: column;
+    height: auto;
+    min-height: 100vh;
+  }
+  .sidebar {
+    width: 100%;
+    height: auto;
+    position: relative;
+    padding: 16px 14px;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+  }
+  .sidebar-logo { margin-bottom: 0; font-size: 18px; flex: 1; }
+  .sidebar-divider { display: none; }
+  .sidebar-nav {
+    flex-direction: row;
+    flex: none;
+    width: 100%;
+    gap: 4px;
+  }
+  .sidebar-link { padding: 8px 12px; font-size: 13px; }
+  .sidebar-footer {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .sidebar-user { padding: 4px 6px; }
+  .dashboard-main {
+    height: auto;
+    overflow-y: visible;
+    padding: 14px;
+  }
+  .summary-layout {
+    flex-direction: column;
+  }
+  .summary-right { width: 100%; }
+  .modal-body { flex-direction: column; }
+  .modal-right { width: 100%; border-top: 1px solid var(--border); border-right: none; }
+  .modal-left { border-right: none; }
+  .grader-actions { flex-wrap: wrap; }
+  .files-header { grid-template-columns: 1fr 80px 90px 110px; }
+  .files-row { grid-template-columns: 1fr 80px 90px 110px; }
+  .auth-card { width: 100%; max-width: 380px; padding: 32px 24px; }
+}
+
+@media (max-width: 480px) {
+  .files-header { grid-template-columns: 1fr 80px 100px; }
+  .files-row { grid-template-columns: 1fr 80px 100px; }
+  .btn-blue { padding: 8px 16px; font-size: 13px; }
+}

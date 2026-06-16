@@ -61,69 +61,60 @@ function EssayModal({ viewing, onClose }: { viewing: ViewingEssay; onClose: () =
     }
   }, [essay]);
 
+  const scoreColor = (s: number) => s >= 85 ? "#1a7a3f" : s >= 70 ? "#7a4a00" : "#8a0000";
+
   return (
-    <div style={{
-      position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)",
-      display: "flex", alignItems: "center", justifyContent: "center",
-      zIndex: 1000, padding: 16,
-    }}>
-      <div style={{
-        background: "var(--card)", borderRadius: 12, width: "100%", maxWidth: 900,
-        maxHeight: "90vh", overflow: "hidden", display: "flex", flexDirection: "column",
-      }}>
-        {/* Header */}
-        <div style={{ padding: "16px 20px", borderBottom: "1px solid var(--border)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <h2 style={{ fontSize: 16, fontWeight: 600, margin: 0 }}>{essay.title}</h2>
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-header">
+          <h2>{essay.title}</h2>
           <button className="essay-edit-btn" onClick={onClose}>✕ Close</button>
         </div>
-
-        {/* Body */}
-        <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
+        <div className="modal-body">
           {/* Left — essay text */}
-          <div style={{ flex: 1, padding: 20, overflowY: "auto", borderRight: "1px solid var(--border)" }}>
-            <div style={{ fontSize: 12, fontWeight: 600, color: "var(--text-muted)", marginBottom: 12, textTransform: "uppercase", letterSpacing: "0.06em" }}>Essay Text</div>
-            {loadingContent ? (
-              <p style={{ color: "var(--text-muted)", fontSize: 13 }}>Extracting text…</p>
-            ) : (
-              <p style={{ fontSize: 13, lineHeight: 1.8, color: "var(--text-primary)", whiteSpace: "pre-wrap" }}>
-                {content || "No content available."}
-              </p>
-            )}
+          <div className="modal-left">
+            <div className="modal-section-label">Essay Text</div>
+            {loadingContent
+              ? <p style={{ color: "var(--text-muted)", fontSize: 13 }}>Extracting text…</p>
+              : <p className="modal-essay-text">{content || "No content available."}</p>
+            }
           </div>
 
           {/* Right — scores */}
-          <div style={{ width: 300, padding: 20, overflowY: "auto", flexShrink: 0 }}>
+          <div className="modal-right">
             {gr ? (
               <>
-                <div style={{ fontSize: 12, fontWeight: 600, color: "var(--text-muted)", marginBottom: 12, textTransform: "uppercase", letterSpacing: "0.06em" }}>Grading Result</div>
-                <div style={{ textAlign: "center", marginBottom: 20 }}>
-                  <div style={{ fontSize: 36, fontWeight: 700, color: scoreColor(gr.overallScore) }}>{gr.overallScore}%</div>
-                  <div style={{ fontSize: 13, color: "var(--text-muted)", marginTop: 4 }}>{gr.overallFeedback}</div>
+                <div className="modal-section-label">Grading Result</div>
+                <div className="modal-score-big" style={{ color: scoreColor(gr.overallScore) }}>
+                  {gr.overallScore}%
                 </div>
+                <p className="modal-feedback">{gr.overallFeedback}</p>
+
                 {[
                   { name: "Grammar",   score: gr.grammarScore,   feedback: gr.grammarFeedback },
                   { name: "Structure", score: gr.structureScore, feedback: gr.structureFeedback },
                   { name: "Clarity",   score: gr.clarityScore,   feedback: gr.clarityFeedback },
                 ].map((c) => (
-                  <div key={c.name} style={{ marginBottom: 16 }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
-                      <span style={{ fontSize: 13, fontWeight: 600 }}>{c.name}</span>
-                      <span style={{ fontSize: 13, color: scoreColor(c.score) }}>{c.score}/100</span>
+                  <div key={c.name} className="modal-criterion">
+                    <div className="modal-criterion-header">
+                      <span>{c.name}</span>
+                      <span style={{ color: scoreColor(c.score) }}>{c.score}/100</span>
                     </div>
-                    <div style={{ height: 6, background: "var(--border)", borderRadius: 3, marginBottom: 6 }}>
-                      <div style={{ height: "100%", width: `${c.score}%`, background: scoreColor(c.score), borderRadius: 3 }} />
+                    <div className="score-bar-track" style={{ marginBottom: 6 }}>
+                      <div className="score-bar-fill" style={{ width: `${c.score}%`, background: scoreColor(c.score) }} />
                     </div>
-                    <p style={{ fontSize: 12, color: "var(--text-muted)", lineHeight: 1.5, fontStyle: "italic" }}>{c.feedback}</p>
+                    <p className="criterion-feedback">{c.feedback}</p>
                   </div>
                 ))}
+
                 {annotations.length > 0 && (
                   <>
-                    <div style={{ fontSize: 12, fontWeight: 600, color: "var(--text-muted)", margin: "16px 0 8px", textTransform: "uppercase", letterSpacing: "0.06em" }}>Annotations</div>
+                    <div className="modal-section-label" style={{ marginTop: 16 }}>Annotations</div>
                     {annotations.map((a: any, i: number) => (
-                      <div key={i} style={{ marginBottom: 12, padding: "8px 10px", background: "var(--bg)", borderRadius: 6, borderLeft: "3px solid var(--border)" }}>
-                        <div style={{ fontSize: 11, fontWeight: 600, color: "var(--text-muted)", marginBottom: 4, textTransform: "uppercase" }}>{a.issue}</div>
-                        <p style={{ fontSize: 12, color: "var(--text-primary)", marginBottom: 4, fontStyle: "italic" }}>"{a.sentence}"</p>
-                        <p style={{ fontSize: 12, color: "var(--text-muted)" }}>→ {a.suggestion}</p>
+                      <div key={i} className="modal-annotation">
+                        <div className="modal-annotation-type">{a.issue}</div>
+                        <p className="modal-annotation-sentence">"{a.sentence}"</p>
+                        <p className="modal-annotation-suggestion">→ {a.suggestion}</p>
                       </div>
                     ))}
                   </>

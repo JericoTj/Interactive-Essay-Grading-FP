@@ -1,13 +1,21 @@
 import mammoth from "mammoth";
-import * as pdfParseModule from "pdf-parse";
-
-// Handle both CJS default and named exports
-const pdfParse = (pdfParseModule as any).default ?? pdfParseModule;
 
 export async function extractText(buffer: Buffer, mimeType: string): Promise<string> {
   if (mimeType === "application/pdf") {
-    const data = await pdfParse(buffer);
-    return data.text.trim();
+    const PDFParser = (await import("pdf2json")).default;
+    return new Promise((resolve, reject) => {
+      const parser = new PDFParser();
+      parser.on("pdfParser_dataReady", (data: any) => {
+        const text = data.Pages
+          .flatMap((page: any) => page.Texts)
+          .map((t: any) => decodeURIComponent(t.R.map((r: any) => r.T).join("")))
+          .join(" ")
+          .trim();
+        resolve(text);
+      });
+      parser.on("pdfParser_dataError", reject);
+      parser.parseBuffer(buffer);
+    });
   }
 
   if (mimeType === "application/vnd.openxmlformats-officedocument.wordprocessingml.document") {

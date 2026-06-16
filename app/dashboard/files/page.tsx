@@ -15,11 +15,55 @@ interface ApiFile {
   createdAt: string;
 }
 
+interface ViewingFile {
+  id: number;
+  name: string;
+  type: FileType;
+  fileUrl: string | null;
+}
+
+function FileModal({ file, onClose }: { file: ViewingFile; onClose: () => void }) {
+  const [content, setContent] = useState("");
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const endpoint = file.type === "Essay"
+      ? `/api/essays/${file.id}/content`
+      : `/api/rubrics/${file.id}/extract`;
+
+    fetch(endpoint, { headers: { Authorization: `Bearer ${token}` } })
+      .then((r) => r.json())
+      .then((d) => setContent(d.content ?? d.text ?? "No content available."))
+      .catch(() => setContent("Failed to load content."))
+      .finally(() => setLoading(false));
+  }, [file]);
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-header">
+          <h2>{file.name}</h2>
+          <button className="essay-edit-btn" onClick={onClose}>✕ Close</button>
+        </div>
+        <div style={{ padding: 20, overflowY: "auto", flex: 1 }}>
+          <div className="modal-section-label">{file.type} Content</div>
+          {loading
+            ? <p style={{ color: "var(--text-muted)", fontSize: 13 }}>Loading content…</p>
+            : <p className="modal-essay-text">{content}</p>
+          }
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function FilesPage() {
   const [files, setFiles]   = useState<ApiFile[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [error, setError]   = useState("");
+  const [viewingFile, setViewingFile] = useState<ViewingFile | null>(null);
 
   useEffect(() => { loadFiles(); }, []);
 
@@ -108,7 +152,8 @@ export default function FilesPage() {
   }
 
   return (
-    <div className="fade-up" style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+  <div className="fade-up" style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+    {viewingFile && <FileModal file={viewingFile} onClose={() => setViewingFile(null)} />}
       <TitleCard title="Files" />
       <div className="content-card">
         {error && <p style={{ color: "var(--red)", fontSize: 13, marginBottom: 10 }}>{error}</p>}
@@ -173,12 +218,11 @@ export default function FilesPage() {
                 </a>
               )}
               <button
-                type="button"
                 className="essay-edit-btn"
                 style={{ fontSize: 12 }}
-                onClick={() => handleDelete(f.id, f.type)}
+                onClick={() => setViewingFile({ id: f.id, name: f.name, type: f.type, fileUrl: f.fileUrl })}
               >
-                Delete
+                Open
               </button>
             </div>
           </div>
