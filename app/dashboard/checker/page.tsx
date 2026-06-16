@@ -30,8 +30,7 @@ function CriterionRow({ c }: { c: Criterion }) {
     </div>
   );
 }
-
-function InputView({ onResult }: { onResult: (r: GradeResult) => void }) {
+function InputView({ onResult }: { onResult: (r: GradeResult, essayId: number) => void }) {
   const [title, setTitle]       = useState("");
   const [text, setText]         = useState("");
   const [error, setError]       = useState("");
@@ -48,26 +47,20 @@ function InputView({ onResult }: { onResult: (r: GradeResult) => void }) {
     try {
       const token = localStorage.getItem("token");
 
-      // Step 1: Submit essay
       const essayRes = await fetch("/api/essays", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({ title, content: text }),
       });
 
       if (!essayRes.ok) {
         const e = await essayRes.json();
         setError(e.error || "Failed to submit essay");
-        setChecking(false);
         return;
       }
 
       const essay = await essayRes.json();
 
-      // Step 2: Grade essay
       const gradeRes = await fetch(`/api/essays/${essay.id}/grade`, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
@@ -76,13 +69,11 @@ function InputView({ onResult }: { onResult: (r: GradeResult) => void }) {
       if (!gradeRes.ok) {
         const e = await gradeRes.json();
         setError(e.error || "Grading failed");
-        setChecking(false);
         return;
       }
 
       const grading = await gradeRes.json();
 
-      // Step 3: Map to GradeResult shape
       const result: GradeResult = {
         aiScore: 0,
         grade: grading.overallScore,
@@ -95,7 +86,7 @@ function InputView({ onResult }: { onResult: (r: GradeResult) => void }) {
         ],
       };
 
-      onResult(result);
+      onResult(result, essay.id);
     } catch {
       setError("Something went wrong, please try again.");
     } finally {
@@ -117,10 +108,7 @@ function InputView({ onResult }: { onResult: (r: GradeResult) => void }) {
           style={{ marginBottom: 10 }}
         />
 
-        <div
-          className="essay-area"
-          onClick={() => document.getElementById("essay-ta")?.focus()}
-        >
+        <div className="essay-area" onClick={() => document.getElementById("essay-ta")?.focus()}>
           {!text && (
             <div className="essay-placeholder">
               <UploadIcon size={20} />
@@ -145,7 +133,22 @@ function InputView({ onResult }: { onResult: (r: GradeResult) => void }) {
   );
 }
 
-function SummaryView({ result, onNext }: { result: GradeResult; onNext: () => void }) {
+function SummaryView({
+  result,
+  essayId,
+  onNext,
+}: {
+  result: GradeResult;
+  essayId: number;
+  onNext: () => void;
+}) {
+  const [saved, setSaved] = useState(false);
+
+  async function handleSave() {
+    // Essay is already saved in DB — just confirm to user
+    setSaved(true);
+  }
+
   return (
     <div className="checker-wrap fade-up">
       <TitleCard title="Summary" />
@@ -160,10 +163,27 @@ function SummaryView({ result, onNext }: { result: GradeResult; onNext: () => vo
               <div className="score-label">Grades &nbsp;{result.grade}%</div>
               <div className="score-letter">{result.letter}</div>
             </div>
+            <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 16 }}>
+              Essay ID: #{essayId}
+            </div>
           </div>
-          <button className="btn-blue" style={{ justifyContent: "center", width: "100%" }} onClick={onNext}>
-            Next
-          </button>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            <button
+              className="btn-blue"
+              style={{ justifyContent: "center", width: "100%" }}
+              onClick={handleSave}
+              disabled={saved}
+            >
+              {saved ? "✓ Saved to Files" : "Save Essay"}
+            </button>
+            <button
+              className="btn-blue"
+              style={{ justifyContent: "center", width: "100%" }}
+              onClick={onNext}
+            >
+              View Details
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -194,18 +214,26 @@ function DetailView({ result, onBack }: { result: GradeResult; onBack: () => voi
     </div>
   );
 }
-
 export default function CheckerPage() {
-  const [view, setView]     = useState<View>("input");
-  const [result, setResult] = useState<GradeResult | null>(null);
+  const [view, setView]       = useState<View>("input");
+  const [result, setResult]   = useState<GradeResult | null>(null);
+  const [essayId, setEssayId] = useState<number>(0);
 
-  function handleResult(r: GradeResult) { setResult(r); setView("summary"); }
+  function handleResult(r: GradeResult, id: number) {
+    setResult(r);
+    setEssayId(id);
+    setView("summary");
+  }
 
   return (
     <>
       {view === "input"   && <InputView onResult={handleResult} />}
-      {view === "summary" && result && <SummaryView result={result} onNext={() => setView("detail")} />}
-      {view === "detail"  && result && <DetailView result={result} onBack={() => setView("summary")} />}
+      {view === "summary" && result && (
+        <SummaryView result={result} essayId={essayId} onNext={() => setView("detail")} />
+      )}
+      {view === "detail"  && result && (
+        <DetailView result={result} onBack={() => setView("summary")} />
+      )}
     </>
   );
 }

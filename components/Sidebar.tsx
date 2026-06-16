@@ -8,7 +8,7 @@ import { clearUser, getUser } from "@/lib/auth";
 const NAV = [
   { href: "/dashboard/checker", label: "Essay Checker", Icon: CheckSquareIcon },
   { href: "/dashboard/grader",  label: "Essay Grader",  Icon: FileIcon },
-  { href: "/dashboard/files",   label: "Files",          Icon: FolderIcon },
+  { href: "/dashboard/files",   label: "Files",         Icon: FolderIcon },
 ] as const;
 
 export default function Sidebar() {
@@ -21,14 +21,14 @@ export default function Sidebar() {
     router.push("/");
   }
 
+  const roleLabel = user?.role === "INSTRUCTOR" ? "Instructor" : "Student";
+  const avatar    = roleLabel[0];
+
   return (
     <aside className="sidebar">
-      {/* Logo */}
       <div className="sidebar-logo">EasyEssays</div>
-
       <div className="sidebar-divider" />
 
-      {/* Nav */}
       <nav className="sidebar-nav">
         {NAV.map(({ href, label, Icon }) => (
           <Link
@@ -41,13 +41,12 @@ export default function Sidebar() {
         ))}
       </nav>
 
-      {/* User */}
       <div className="sidebar-footer">
         <div className="sidebar-user">
-          <div className="sidebar-avatar">{user?.name?.[0] ?? "?"}</div>
+          <div className="sidebar-avatar">{avatar}</div>
           <div>
-            <div className="sidebar-username">{user?.name ?? "Guest"}</div>
-            <div className="sidebar-settings">Settings</div>
+            <div className="sidebar-username">{roleLabel}</div>
+            <div className="sidebar-settings">ID: {user?.userId ?? "—"}</div>
           </div>
         </div>
         <button className="sidebar-link sidebar-logout" onClick={handleLogout}>

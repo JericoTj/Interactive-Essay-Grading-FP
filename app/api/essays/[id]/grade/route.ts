@@ -15,31 +15,6 @@ async function callGroq(prompt: string): Promise<string> {
   return completion.choices[0].message.content ?? "";
 }
 
-
-/**
- * @swagger
- * /essays/{id}/grade:
- *   post:
- *     summary: Grade an essay using AI
- *     description: Runs two AI analyses - rubric-based scoring and grammar annotation
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: integer
- *     responses:
- *       200:
- *         description: Grading result with scores and annotations
- *       401:
- *         description: Unauthorized
- *       404:
- *         description: Essay not found
- *       503:
- *         description: AI service unavailable
- */
 export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -48,19 +23,13 @@ export async function POST(
     const { id } = await params;
 
     const user = verifyToken(req);
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const essayId = parseInt(id);
-    if (isNaN(essayId)) {
-      return NextResponse.json({ error: "Invalid essay ID" }, { status: 400 });
-    }
+    if (isNaN(essayId)) return NextResponse.json({ error: "Invalid essay ID" }, { status: 400 });
 
     const essay = await prisma.essay.findUnique({ where: { id: essayId } });
-    if (!essay) {
-      return NextResponse.json({ error: "Essay not found" }, { status: 404 });
-    }
+    if (!essay) return NextResponse.json({ error: "Essay not found" }, { status: 404 });
 
     if (user.role === "STUDENT" && essay.userId !== user.userId) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
@@ -71,28 +40,42 @@ export async function POST(
       return NextResponse.json({ error: "Essay already graded", result: existing }, { status: 400 });
     }
 
-    if (essay.content.trim().split(" ").length < 20) {
+    // Get essay content — either from DB text or extracted from file
+    let essayText = essay.content;
+    if (!essayText && essay.fileKey) {
+      return NextResponse.json({ error: "File-based essays must be extracted first" }, { status: 400 });
+    }
+
+    if (essayText.trim().split(" ").length < 20) {
       return NextResponse.json({ error: "Essay is too short to grade" }, { status: 400 });
     }
 
+    // Optional rubric text from request body
+    const body = await req.json().catch(() => ({}));
+    const rubricText = body.rubricText as string | undefined;
+
+    const rubricSection = rubricText
+      ? `Use the following rubric to grade the essay:\n${rubricText}\n\nBased on this rubric, determine appropriate criteria and scores.`
+      : `Grade across three standard criteria: grammar, structure, and clarity.`;
+
     // AI FEATURE 1: Rubric-aligned scoring
-    const gradingPrompt = `You are an academic essay grader. Grade the following essay across three criteria: grammar, structure, and clarity.
-Return ONLY valid JSON with no extra text or markdown code fences:
+    const gradingPrompt = `You are an academic essay grader. ${rubricSection}
+Return ONLY valid JSON with no extra text or markdown:
 {
   "overallScore": <number 0-100>,
   "overallFeedback": "<2-3 sentence overall summary>",
-  "grammar": { "score": <number 0-100>, "feedback": "<specific grammar feedback>" },
-  "structure": { "score": <number 0-100>, "feedback": "<specific structure feedback>" },
-  "clarity": { "score": <number 0-100>, "feedback": "<specific clarity feedback>" }
+  "grammar": { "score": <number 0-100>, "feedback": "<specific feedback>" },
+  "structure": { "score": <number 0-100>, "feedback": "<specific feedback>" },
+  "clarity": { "score": <number 0-100>, "feedback": "<specific feedback>" }
 }
 
 ESSAY TITLE: ${essay.title}
 ESSAY:
-${essay.content}`;
+${essayText}`;
 
     // AI FEATURE 2: Grammar and style annotation
     const annotationPrompt = `You are a writing coach. Identify the 5 most important writing issues in this essay.
-Return ONLY valid JSON with no extra text or markdown code fences:
+Return ONLY valid JSON with no extra text or markdown:
 {
   "annotations": [
     {
@@ -104,10 +87,9 @@ Return ONLY valid JSON with no extra text or markdown code fences:
 }
 
 ESSAY:
-${essay.content}`;
+${essayText}`;
 
     let gradingRaw: string, annotationRaw: string;
-
     try {
       [gradingRaw, annotationRaw] = await Promise.all([
         callGroq(gradingPrompt),
@@ -115,10 +97,7 @@ ${essay.content}`;
       ]);
     } catch (groqError) {
       console.error("GROQ CALL FAILED:", groqError);
-      return NextResponse.json(
-        { error: "AI service unavailable", detail: String(groqError) },
-        { status: 503 }
-      );
+      return NextResponse.json({ error: "AI service unavailable", detail: String(groqError) }, { status: 503 });
     }
 
     let grading, annotations;
@@ -127,12 +106,7 @@ ${essay.content}`;
       annotations = JSON.parse(annotationRaw);
     } catch (parseError) {
       console.error("PARSE FAILED:", parseError);
-      console.error("Raw grading:", gradingRaw);
-      console.error("Raw annotations:", annotationRaw);
-      return NextResponse.json(
-        { error: "AI returned malformed response", detail: String(parseError) },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: "AI returned malformed response" }, { status: 500 });
     }
 
     const result = await prisma.gradingResult.create({
@@ -154,9 +128,6 @@ ${essay.content}`;
 
   } catch (topLevelError) {
     console.error("TOP LEVEL ERROR:", topLevelError);
-    return NextResponse.json(
-      { error: "Unexpected error", detail: String(topLevelError) },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Unexpected error", detail: String(topLevelError) }, { status: 500 });
   }
 }
