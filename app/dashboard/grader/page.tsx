@@ -10,6 +10,7 @@ interface Essay {
   content: string;
   fileName: string | null;
   fileUrl: string | null;
+  fileKey: string | null;  
   gradingResult: {
     overallScore: number;
     overallFeedback: string;
@@ -44,6 +45,21 @@ function EssayModal({ viewing, onClose }: { viewing: ViewingEssay; onClose: () =
   const { essay } = viewing;
   const gr = essay.gradingResult;
   const annotations = gr ? JSON.parse(gr.annotations) : [];
+  const [content, setContent] = useState(essay.content || "");
+  const [loadingContent, setLoadingContent] = useState(!essay.content && !!essay.fileKey);
+
+  useEffect(() => {
+    if (!essay.content && essay.fileKey) {
+      const token = localStorage.getItem("token");
+      fetch(`/api/essays/${essay.id}/content`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+        .then((r) => r.json())
+        .then((d) => setContent(d.content ?? ""))
+        .catch(() => setContent("Failed to load content."))
+        .finally(() => setLoadingContent(false));
+    }
+  }, [essay]);
 
   return (
     <div style={{
@@ -62,17 +78,16 @@ function EssayModal({ viewing, onClose }: { viewing: ViewingEssay; onClose: () =
         </div>
 
         {/* Body */}
-        <div style={{ display: "flex", flex: 1, overflow: "hidden", gap: 0 }}>
+        <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
           {/* Left — essay text */}
           <div style={{ flex: 1, padding: 20, overflowY: "auto", borderRight: "1px solid var(--border)" }}>
             <div style={{ fontSize: 12, fontWeight: 600, color: "var(--text-muted)", marginBottom: 12, textTransform: "uppercase", letterSpacing: "0.06em" }}>Essay Text</div>
-            <p style={{ fontSize: 13, lineHeight: 1.8, color: "var(--text-primary)", whiteSpace: "pre-wrap" }}>
-              {essay.content || "File-based essay — open file to read content."}
-            </p>
-            {essay.fileUrl && (
-              <a href={essay.fileUrl} target="_blank" rel="noopener noreferrer" className="btn-blue" style={{ display: "inline-flex", marginTop: 12, fontSize: 12 }}>
-                Open File
-              </a>
+            {loadingContent ? (
+              <p style={{ color: "var(--text-muted)", fontSize: 13 }}>Extracting text…</p>
+            ) : (
+              <p style={{ fontSize: 13, lineHeight: 1.8, color: "var(--text-primary)", whiteSpace: "pre-wrap" }}>
+                {content || "No content available."}
+              </p>
             )}
           </div>
 
@@ -81,12 +96,10 @@ function EssayModal({ viewing, onClose }: { viewing: ViewingEssay; onClose: () =
             {gr ? (
               <>
                 <div style={{ fontSize: 12, fontWeight: 600, color: "var(--text-muted)", marginBottom: 12, textTransform: "uppercase", letterSpacing: "0.06em" }}>Grading Result</div>
-
                 <div style={{ textAlign: "center", marginBottom: 20 }}>
                   <div style={{ fontSize: 36, fontWeight: 700, color: scoreColor(gr.overallScore) }}>{gr.overallScore}%</div>
                   <div style={{ fontSize: 13, color: "var(--text-muted)", marginTop: 4 }}>{gr.overallFeedback}</div>
                 </div>
-
                 {[
                   { name: "Grammar",   score: gr.grammarScore,   feedback: gr.grammarFeedback },
                   { name: "Structure", score: gr.structureScore, feedback: gr.structureFeedback },
@@ -103,7 +116,6 @@ function EssayModal({ viewing, onClose }: { viewing: ViewingEssay; onClose: () =
                     <p style={{ fontSize: 12, color: "var(--text-muted)", lineHeight: 1.5, fontStyle: "italic" }}>{c.feedback}</p>
                   </div>
                 ))}
-
                 {annotations.length > 0 && (
                   <>
                     <div style={{ fontSize: 12, fontWeight: 600, color: "var(--text-muted)", margin: "16px 0 8px", textTransform: "uppercase", letterSpacing: "0.06em" }}>Annotations</div>

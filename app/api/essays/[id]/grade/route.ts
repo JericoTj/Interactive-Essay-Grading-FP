@@ -41,14 +41,49 @@ export async function POST(
     }
 
     // Get essay content — either from DB text or extracted from file
-    let essayText = essay.content;
-    if (!essayText && essay.fileKey) {
-      return NextResponse.json({ error: "File-based essays must be extracted first" }, { status: 400 });
-    }
+    // Get essay content — auto-extract from file if needed
+  let essayText = essay.content;
+  if (!essayText.trim() && essay.fileKey) {
+    try {
+      const { GetObjectCommand } = await import("@aws-sdk/client-s3");
+      const { r2 } = await import("@/lib/r2");
+      const { extractText } = await import("@/lib/extract");
 
-    if (essayText.trim().split(" ").length < 20) {
-      return NextResponse.json({ error: "Essay is too short to grade" }, { status: 400 });
+      const command = new GetObjectCommand({
+        Bucket: process.env.R2_BUCKET_NAME!,
+        Key: essay.fileKey,
+      });
+
+      const response = await r2.send(command);
+      const chunks: Uint8Array[] = [];
+      for await (const chunk of response.Body as AsyncIterable<Uint8Array>) {
+        chunks.push(chunk);
+      }
+      const buffer = Buffer.concat(chunks);
+
+      const ext = essay.fileName?.split(".").pop()?.toLowerCase();
+      const mimeType = ext === "pdf"
+        ? "application/pdf"
+        : ext === "docx"
+        ? "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        : "text/plain";
+
+      essayText = await extractText(buffer, mimeType);
+
+      // Cache extracted text back to DB
+      await prisma.essay.update({
+        where: { id: essay.id },
+        data: { content: essayText },
+      });
+    } catch (extractError) {
+      console.error("EXTRACT ERROR:", extractError);
+      return NextResponse.json({ error: "Failed to extract essay text from file" }, { status: 500 });
     }
+  }
+
+  if (!essayText.trim() || essayText.trim().split(" ").length < 20) {
+    return NextResponse.json({ error: "Essay is too short to grade" }, { status: 400 });
+  }
 
     // Optional rubric text from request body
     const body = await req.json().catch(() => ({}));

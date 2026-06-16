@@ -6,51 +6,45 @@ datasource db {
   provider = "postgresql"
 }
 
-enum Role {
-  STUDENT
-  INSTRUCTOR
-}
-
 model User {
   id        Int      @id @default(autoincrement())
   name      String
   email     String   @unique
   password  String
   role      Role     @default(STUDENT)
+  createdAt DateTime @default(now())
   essays    Essay[]
   rubrics   Rubric[]
-  createdAt DateTime @default(now())
 }
 
 model Essay {
   id            Int            @id @default(autoincrement())
   title         String
   content       String         @default("")
-  fileUrl       String?
+  userId        Int
+  createdAt     DateTime       @default(now())
   fileKey       String?
   fileName      String?
-  userId        Int
+  fileUrl       String?
   user          User           @relation(fields: [userId], references: [id])
   gradingResult GradingResult?
-  createdAt     DateTime       @default(now())
 }
 
 model Rubric {
   id          Int      @id @default(autoincrement())
   name        String
   description String?
-  fileUrl     String?
+  userId      Int
+  createdAt   DateTime @default(now())
   fileKey     String?
   fileName    String?
-  userId      Int
+  fileUrl     String?
   user        User     @relation(fields: [userId], references: [id])
-  createdAt   DateTime @default(now())
 }
 
 model GradingResult {
   id                Int      @id @default(autoincrement())
   essayId           Int      @unique
-  essay             Essay    @relation(fields: [essayId], references: [id])
   overallScore      Float
   overallFeedback   String
   grammarScore      Float
@@ -61,5 +55,10 @@ model GradingResult {
   clarityFeedback   String
   annotations       String
   gradedAt          DateTime @default(now())
+  essay             Essay    @relation(fields: [essayId], references: [id])
 }
 
+enum Role {
+  STUDENT
+  INSTRUCTOR
+}
