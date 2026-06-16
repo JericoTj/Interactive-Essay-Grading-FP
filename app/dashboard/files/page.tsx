@@ -46,7 +46,7 @@ function FileModal({ file, onClose }: { file: ViewingFile; onClose: () => void }
           <h2>{file.name}</h2>
           <button className="essay-edit-btn" onClick={onClose}>✕ Close</button>
         </div>
-        <div style={{ padding: 20, overflowY: "auto", flex: 1 }}>
+        <div style={{ padding: 20, overflowY: "auto", flex: 1, minHeight: 0 }}>
           <div className="modal-section-label">{file.type} Content</div>
           {loading
             ? <p style={{ color: "var(--text-muted)", fontSize: 13 }}>Loading content…</p>
@@ -59,10 +59,10 @@ function FileModal({ file, onClose }: { file: ViewingFile; onClose: () => void }
 }
 
 export default function FilesPage() {
-  const [files, setFiles]   = useState<ApiFile[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [files, setFiles]         = useState<ApiFile[]>([]);
+  const [loading, setLoading]     = useState(true);
   const [uploading, setUploading] = useState(false);
-  const [error, setError]   = useState("");
+  const [error, setError]         = useState("");
   const [viewingFile, setViewingFile] = useState<ViewingFile | null>(null);
 
   useEffect(() => { loadFiles(); }, []);
@@ -109,29 +109,24 @@ export default function FilesPage() {
   async function handleUpload(e: React.ChangeEvent<HTMLInputElement>, type: FileType) {
     const file = e.target.files?.[0];
     if (!file) return;
-
     setUploading(true);
     setError("");
-
     try {
       const token = localStorage.getItem("token");
       const formData = new FormData();
       formData.append("file", file);
       formData.append("type", type.toLowerCase());
       formData.append("name", file.name.replace(/\.[^/.]+$/, ""));
-
       const res = await fetch("/api/upload", {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
         body: formData,
       });
-
       if (!res.ok) {
         const err = await res.json();
         setError(err.error || "Upload failed");
         return;
       }
-
       await loadFiles();
     } catch {
       setError("Upload failed, please try again");
@@ -141,20 +136,12 @@ export default function FilesPage() {
     }
   }
 
-  async function handleDelete(id: number, type: FileType) {
-    const token = localStorage.getItem("token");
-    const endpoint = type === "Essay" ? `/api/essays/${id}` : `/api/rubrics/${id}`;
-    await fetch(endpoint, {
-      method: "DELETE",
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    setFiles((prev) => prev.filter((f) => !(f.id === id && f.type === type)));
-  }
-
   return (
-  <div className="fade-up" style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-    {viewingFile && <FileModal file={viewingFile} onClose={() => setViewingFile(null)} />}
+    <div className="fade-up" style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+      {viewingFile && <FileModal file={viewingFile} onClose={() => setViewingFile(null)} />}
+
       <TitleCard title="Files" />
+
       <div className="content-card">
         {error && <p style={{ color: "var(--red)", fontSize: 13, marginBottom: 10 }}>{error}</p>}
 
@@ -205,26 +192,13 @@ export default function FilesPage() {
             <span style={{ color: "var(--text-muted)", fontSize: 12 }}>
               {new Date(f.createdAt).toLocaleDateString()}
             </span>
-            <div style={{ display: "flex", gap: 6 }}>
-              {f.fileUrl && (
-                <a
-                  href={f.fileUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="essay-edit-btn"
-                  style={{ fontSize: 12 }}
-                >
-                  Open
-                </a>
-              )}
-              <button
-                className="essay-edit-btn"
-                style={{ fontSize: 12 }}
-                onClick={() => setViewingFile({ id: f.id, name: f.name, type: f.type, fileUrl: f.fileUrl })}
-              >
-                Open
-              </button>
-            </div>
+            <button
+              className="essay-edit-btn"
+              style={{ fontSize: 12 }}
+              onClick={() => setViewingFile({ id: f.id, name: f.name, type: f.type, fileUrl: f.fileUrl })}
+            >
+              Open
+            </button>
           </div>
         ))}
       </div>
