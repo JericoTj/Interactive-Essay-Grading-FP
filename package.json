@@ -4,10 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && prisma migrate deploy && next build",
+    "build": "prisma generate && next build",
     "start": "next start -p ${PORT:-3000}",
     "lint": "eslint",
-    "postinstall": ""
+    "postinstall": "echo done"
   },
   "dependencies": {
     "prisma": "^7.8.0",
