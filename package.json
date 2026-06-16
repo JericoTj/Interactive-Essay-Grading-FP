@@ -2,14 +2,13 @@
   "name": "my-app",
   "version": "0.1.0",
   "private": true,
-  "start": "next start -p ${PORT:-3000}",
   "scripts": {
-  "dev": "next dev",
-  "build": "prisma migrate deploy && prisma generate && next build",
-  "start": "next start -p ${PORT:-3000}",
-  "lint": "eslint",
-  "postinstall": "prisma generate"
-},
+    "dev": "next dev",
+    "build": "prisma generate && prisma migrate deploy && next build",
+    "start": "next start -p ${PORT:-3000}",
+    "lint": "eslint",
+    "postinstall": ""
+  },
   "dependencies": {
     "prisma": "^7.8.0",
     "@aws-sdk/client-s3": "^3.1069.0",
@@ -45,12 +44,7 @@
     "typescript": "^5"
   },
   "engines": {
-  "name": "my-app",
-  "version": "0.1.0",
-  "private": true,
-  "engines": {
     "node": "20",
     "npm": ">=10"
   }
-}
 }
