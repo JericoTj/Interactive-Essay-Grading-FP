@@ -92,13 +92,21 @@ This repository must be shared with:
 
 ### API Endpoints
 
-
-| Method  | Endpoint | Description  | Auth Required | 
-| ------------- |:-------------:|:-------------:|:-------------:|
-| Get   |  |   | Yes/No | 
-| Post   |  |   | Yes/No | 
-| Put   |  |   | Yes/No | 
-| Delete   |  |   | Yes/No | 
+| Method | Endpoint                    | Description                                      | Auth Required |
+| ------ | --------------------------- | ------------------------------------------------ | ------------- |
+| POST   | `/api/auth/login`           | Authenticate a user and log in to the system     | No            |
+| POST   | `/api/auth/register`        | Register a new user account                      | No            |
+| GET    | `/api/docs`                 | Retrieve API documentation                       | No            |
+| GET    | `/api/essays`               | Retrieve all essays                              | Yes           |
+| POST   | `/api/essays`               | Create a new essay submission                    | Yes           |
+| GET    | `/api/essays/[id]`          | Retrieve a specific essay by ID                  | Yes           |
+| GET    | `/api/essays/[id]/content`  | Retrieve the content of a specific essay         | Yes           |
+| POST   | `/api/essays/[id]/grade`    | Grade a specific essay using the selected rubric | Yes           |
+| GET    | `/api/rubrics`              | Retrieve all rubrics                             | Yes           |
+| POST   | `/api/rubrics`              | Create a new rubric                              | Yes           |
+| GET    | `/api/rubrics/[id]`         | Retrieve a specific rubric by ID                 | Yes           |
+| POST   | `/api/rubrics/[id]/extract` | Extract rubric criteria from uploaded content    | Yes           |
+| POST   | `/api/upload`               | Upload essay or rubric files to the system       | Yes           |
 
 
 ### API Documentation
