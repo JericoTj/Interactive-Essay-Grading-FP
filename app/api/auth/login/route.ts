@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-
+import { rateLimit } from "@/lib/rate-limit";
 
 /**
  * @swagger
@@ -34,6 +34,10 @@ import jwt from "jsonwebtoken";
 
 export async function POST(req: Request) {
   const { email, password } = await req.json();
+
+  // Apply rate limiting
+  const ip = req.headers.get("x-forwarded-for") || "unknown";
+  await rateLimit(ip);
 
   if (!email || !password) {
   return NextResponse.json({ error: "Email and password required" }, { status: 400 });
