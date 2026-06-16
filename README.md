@@ -17,7 +17,7 @@ Group Members:
     
     o Jerico, 2802521112, Team Lead, JericoTj
     o YiYang, 2802542924, Backend, TT1264
-    o Sasha, 2802536442 , Support, mumeiphoric
+    o Heraisya, 2802536442 , Frontend & Documentation, mumeiphoric
 ---
 ## Instructor & Repository Access
 This repository must be shared with:
@@ -92,21 +92,21 @@ This repository must be shared with:
 
 ### API Endpoints
 
-| Method | Endpoint                    | Description                                      | Auth Required |
-| ------ | --------------------------- | ------------------------------------------------ | ------------- |
-| POST   | `/api/auth/login`           | Authenticate a user and log in to the system     | No            |
-| POST   | `/api/auth/register`        | Register a new user account                      | No            |
-| GET    | `/api/docs`                 | Retrieve API documentation                       | No            |
-| GET    | `/api/essays`               | Retrieve all essays                              | Yes           |
-| POST   | `/api/essays`               | Create a new essay submission                    | Yes           |
-| GET    | `/api/essays/[id]`          | Retrieve a specific essay by ID                  | Yes           |
-| GET    | `/api/essays/[id]/content`  | Retrieve the content of a specific essay         | Yes           |
-| POST   | `/api/essays/[id]/grade`    | Grade a specific essay using the selected rubric | Yes           |
-| GET    | `/api/rubrics`              | Retrieve all rubrics                             | Yes           |
-| POST   | `/api/rubrics`              | Create a new rubric                              | Yes           |
-| GET    | `/api/rubrics/[id]`         | Retrieve a specific rubric by ID                 | Yes           |
-| POST   | `/api/rubrics/[id]/extract` | Extract rubric criteria from uploaded content    | Yes           |
-| POST   | `/api/upload`               | Upload essay or rubric files to the system       | Yes           |
+| Method | Endpoint                  | Description                                    | Auth Required |
+| ------ | ------------------------- | ---------------------------------------------- | ------------- |
+| POST   | `/api/auth/login`         | Login to the system                           | No            |
+| POST   | `/api/auth/register`      | Create an account                             | No            |
+| GET    | `/api/docs`               | View API Docs                                | No            |
+| GET    | `/api/essays`             | View all essays                              | Yes           |
+| POST   | `/api/essays`             | Submit an essay                              | Yes           |
+| GET    | `/api/essays/[id]`        | View an essay                               | Yes           |
+| GET    | `/api/essays/[id]/content` | View an essay's content                     | Yes           |
+| POST   | `/api/essays/[id]/grade`  | Grade an essay using a rubric               | Yes           |
+| GET    | `/api/rubrics`            | View all rubrics                            | Yes           |
+| POST   | `/api/rubrics`            | Create a rubric                             | Yes           |
+| GET    | `/api/rubrics/[id]`       | View a rubric                              | Yes           |
+| POST   | `/api/rubrics/[id]/extract`| Extract rubric criteria from the content   | Yes           |
+| POST   | `/api/upload`             | Upload essays or rubrics to the system     | Yes           |
 
 
 ### API Documentation
@@ -217,8 +217,6 @@ Student Name: [Name]
 
     • AI-related work:
 
-__Contributions must match GitHub commit history.__
-
 ---
 
 ## AI Usage Disclosure (MANDATORY)
@@ -230,10 +228,6 @@ __Contributions must match GitHub commit history.__
     • Purpose of usage
 
     • Which parts were assisted
-
-Example:
-“ChatGPT was used to assist with API structure and AI testing scenario generation. All
-code was reviewed and modified by the team.”
 
 ---
 
@@ -250,7 +244,11 @@ We declare that:
     • This project is our own work
     • AI usage is disclosed honestly
     • All group members understand the system
+
 Signed by Group Members:
+Jerico
+Yiyang
+Heraisya
 
 ---
 # SETUP
