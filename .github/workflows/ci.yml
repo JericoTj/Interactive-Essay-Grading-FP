@@ -1,0 +1,31 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install dependencies
+        run: npm ci
+      - name: Build
+        run: npm run build
+        env:
+          DATABASE_URL: postgresql://postgres:password@localhost:5432/easyessays
+          JWT_SECRET: ci-secret
+          GROQ_API_KEY: dummy
+          GEMINI_API_KEY: dummy
+          R2_ACCOUNT_ID: dummy
+          R2_ACCESS_KEY_ID: dummy
+          R2_SECRET_ACCESS_KEY: dummy
+          R2_BUCKET_NAME: dummy
+          R2_PUBLIC_URL: https://dummy.r2.dev
