@@ -379,6 +379,8 @@ Jerico was involved in backend development, including the setup and configuratio
 
 Heraisya was involved in frontend development and the construction of dashboards and features for file upload and management of rubrics and essays. She supported the development of APIs and their documentation, the design and testing of databases, the verification of deployments, and authentication. She also supported project documentation, the integration of AI-assisted grading, and the integration of AI-assisted grading workflows.
 
+Note: Most commits and contributions were done in collaboration using the same device.
+
 ---
 
 ## AI Usage Disclosure
