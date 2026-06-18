@@ -104,6 +104,8 @@ export async function POST(
       "structure": { "score": <number 0-100, e.g. 85>, "feedback": "<specific feedback>" },
       "clarity": { "score": <number 0-100, e.g. 78>, "feedback": "<specific feedback>" }
     }
+    All scores MUST be between 0 and 100. The overallScore should reflect the average of the three criteria.
+      
 
 ESSAY TITLE: ${essay.title}
 ESSAY:
