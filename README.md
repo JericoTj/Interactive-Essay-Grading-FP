@@ -367,17 +367,17 @@ R2_PUBLIC_URL			 # public base URL for stored files
 
 ### GitHub Contribution Summary
 
-**Jerico (2802521112)**
-
-Jerico was a Team Lead and managed the development and architectural design of applications. He supported the development of features for user authentication, essay moderation, and dashboards. He was involved in the creation and testing of API (Application Programming Interface) endpoints, assisted in the implementation of Protected Routes, and supported the development of the AI-enabled essay grading tool.
-
 **YiYang (2802542924)**
 
-YiYang was involved in backend development, including the setup and configuration of databases, Docker, and deployment. He participated in the development and testing of APIs, deployment security, and assisted in the development of features for AI-enabled grading and rubric extraction.
+YiYang managed the development and architectural design of applications. He supported the development of features for user authentication, essay moderation, and dashboards. He was involved in the creation and testing of API (Application Programming Interface) endpoints, assisted in the implementation of Protected Routes, and supported the development of the AI-enabled essay grading tool.
+
+**Jerico (2802521112)**
+
+Jerico was involved in backend development, including the setup and configuration of databases, Docker, and deployment. He participated in the development and testing of APIs, deployment security, and assisted in the development of features for AI-enabled grading and rubric extraction.
 
 **Heraisya (2802536442)**
 
-Heraisya was involved in frontend development and the construction of dashboards and features for file upload and management of rubrics and essays. He supported the development of APIs and their documentation, the design and testing of databases, the verification of deployments, and authentication. He also supported project documentation, the integration of AI-assisted grading, and the integration of AI-assisted grading workflows
+Heraisya was involved in frontend development and the construction of dashboards and features for file upload and management of rubrics and essays. She supported the development of APIs and their documentation, the design and testing of databases, the verification of deployments, and authentication. She also supported project documentation, the integration of AI-assisted grading, and the integration of AI-assisted grading workflows.
 
 ---
 
