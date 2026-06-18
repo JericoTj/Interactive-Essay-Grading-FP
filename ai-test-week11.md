@@ -3,8 +3,6 @@
 ## Project
 Interactive Essay Grading FP / EasyEssays
 
-## Tester
-Yiyang Liu
 
 ## Testing Objective
 The goal of this testing was to check whether the AI grading feature could support the essay grading workflow correctly. The test focused on whether the system could accept essay input, send it to the AI grading process, and return useful feedback for the user.
