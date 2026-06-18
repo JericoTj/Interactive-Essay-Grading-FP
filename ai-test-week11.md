@@ -64,3 +64,6 @@ The empty input case also needs better handling. The system should not send empt
 ## Conclusion
 
 In Week 11, the AI grading feature was tested mainly for basic functionality. The feature was working at a basic level, but it still needed better documentation, input validation, and consistency testing. The test results show that the AI feature could support the main purpose of the project, but further refinement would improve reliability and user trust.
+
+<img width="877" height="280" alt="image" src="https://github.com/user-attachments/assets/22c2a148-4487-4879-8937-bb365858088e" />
+
