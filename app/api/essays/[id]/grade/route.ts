@@ -95,14 +95,15 @@ export async function POST(
 
     // AI FEATURE 1: Rubric-aligned scoring
     const gradingPrompt = `You are an academic essay grader. ${rubricSection}
-Return ONLY valid JSON with no extra text or markdown:
-{
-  "overallScore": <number 0-100>,
-  "overallFeedback": "<2-3 sentence overall summary>",
-  "grammar": { "score": <number 0-100>, "feedback": "<specific feedback>" },
-  "structure": { "score": <number 0-100>, "feedback": "<specific feedback>" },
-  "clarity": { "score": <number 0-100>, "feedback": "<specific feedback>" }
-}
+    IMPORTANT: All scores must be on a scale of 0-100. Do not use any other scale.
+    Return ONLY valid JSON with no extra text or markdown:
+    {
+      "overallScore": <number 0-100, e.g. 75>,
+      "overallFeedback": "<2-3 sentence overall summary>",
+      "grammar": { "score": <number 0-100, e.g. 80>, "feedback": "<specific feedback>" },
+      "structure": { "score": <number 0-100, e.g. 85>, "feedback": "<specific feedback>" },
+      "clarity": { "score": <number 0-100, e.g. 78>, "feedback": "<specific feedback>" }
+    }
 
 ESSAY TITLE: ${essay.title}
 ESSAY:
